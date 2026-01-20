@@ -6,7 +6,6 @@ A cross-platform tool that lets you highlight any word anywhere on your computer
 
 ✨ **System-Wide Text Capture** - Works in browsers, PDFs, Word, any application
 📚 **Automatic Definitions** - Fetches top definitions from free dictionary API
-🎯 **Context Preservation** - Includes the sentence where you found the word
 🗂️ **Deck Selection** - Choose which Anki deck to add cards to
 🖥️ **Cross-Platform** - Works on both Windows and macOS
 ⚡ **Fast Workflow** - Highlight → Right-click → Done!
