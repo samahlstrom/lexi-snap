@@ -28,6 +28,7 @@ env/
 # IDEs
 .vscode/
 .idea/
+.claude/
 *.swp
 *.swo
 *~
@@ -47,3 +48,4 @@ test_output/
 *.exe
 *.app
 *.dmg
+*.zip
