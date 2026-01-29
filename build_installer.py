@@ -7,7 +7,7 @@ import sys
 def build():
     """Build the executable."""
     print("=" * 60)
-    print("Building Dict-to-Anki standalone executable...")
+    print("Building Lexi Snap standalone executable...")
     print("=" * 60)
 
     # Check for icon
@@ -15,7 +15,7 @@ def build():
 
     args = [
         'app.py',
-        '--name=DictToAnki',
+        '--name=LexiSnap',
         '--onefile',
         '--windowed',  # No console window
         '--noconfirm',
@@ -26,14 +26,14 @@ def build():
 
     if icon_path:
         args.append(f'--icon={icon_path}')
-        print(f"✓ Using icon: {icon_path}")
+        print(f"Using icon: {icon_path}")
     else:
-        print("⚠ No icon found (optional)")
+        print("No icon found (optional)")
 
     # Add assets if they exist
     if os.path.exists('assets'):
         args.append('--add-data=assets;assets')
-        print("✓ Including assets folder")
+        print("Including assets folder")
 
     print("\nBuilding... This may take a few minutes.\n")
 
@@ -41,15 +41,15 @@ def build():
         PyInstaller.__main__.run(args)
 
         print("\n" + "=" * 60)
-        print("✓ Build successful!")
-        print(f"\nExecutable: dist\\DictToAnki.exe")
+        print("Build successful!")
+        print(f"\nExecutable: dist\\LexiSnap.exe")
         print("\nNext steps:")
-        print("  1. Test: dist\\DictToAnki.exe")
+        print("  1. Test: dist\\LexiSnap.exe")
         print("  2. Create installer: iscc installer.iss")
         print("=" * 60)
 
     except Exception as e:
-        print(f"\n✗ Build failed: {e}")
+        print(f"\nBuild failed: {e}")
         sys.exit(1)
 
 
