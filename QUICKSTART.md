@@ -1,16 +1,16 @@
 # Quick Start Guide
 
-## ✅ What I Built
+## What Lexi Snap Does
 
-A **modern, professional desktop application** with:
-- Beautiful CustomTkinter dark UI (no more grainy Windows XP look!)
+A **modern desktop application** for creating Anki flashcards:
+- Beautiful CustomTkinter dark UI with sidebar navigation
 - Global hotkey (Ctrl+Alt+D) - works WITHOUT admin
 - System tray app - runs silently
 - Auto-start on Windows login
 - Professional Windows installer
-- One-click installation for normal users
+- Card history and notification options
 
-## 🚀 Run It Now
+## Run It Now
 
 ```bash
 cd C:\Users\Sam\Documents\GitHub\dict-to-anki
@@ -19,20 +19,19 @@ python app.py
 
 The app will:
 1. Start in your system tray (look bottom-right)
-2. Show a notification
-3. Double-click the tray icon to open settings
+2. Double-click the tray icon to open settings
 
-## 🎯 Test the Workflow
+## Test the Workflow
 
 1. Make sure Anki is running with AnkiConnect installed
 2. Highlight any word in your browser
 3. Press **Ctrl+Alt+D**
 4. Dialog appears - select deck - click "Add Card"
-5. Notification confirms!
+5. Badge counter updates on tray icon!
 
 **Pro tip:** Set a default deck in settings for instant adds (no dialog!)
 
-## 📦 Build Installer (For Distribution)
+## Build Installer (For Distribution)
 
 ### Step 1: Build Executable
 
@@ -41,7 +40,7 @@ pip install pyinstaller
 python build_installer.py
 ```
 
-This creates: `dist/DictToAnki.exe` (30-40MB standalone)
+This creates: `dist/LexiSnap.exe` (30-40MB standalone)
 
 ### Step 2: Create Windows Installer
 
@@ -52,46 +51,51 @@ cd C:\Users\Sam\Documents\GitHub\dict-to-anki
 iscc installer.iss
 ```
 
-This creates: `Output/DictToAnki-Setup.exe`
+This creates: `Output/LexiSnap-Setup.exe`
 
-## 📋 File Structure
+## File Structure
 
 ```
-dict-to-anki/
-├── app.py                 # Main application (500 lines, does everything!)
+lexi-snap/
+├── app.py                 # Main application
 ├── requirements.txt       # Python dependencies
 ├── build_installer.py     # PyInstaller build script
+├── LexiSnap.spec          # PyInstaller spec file
 ├── installer.iss          # Inno Setup configuration
 ├── README.md              # User documentation
-└── assets/                # Optional icons
+└── assets/                # App icons
+    ├── icon.ico
+    └── icon.png
 ```
 
-## 🎨 What Makes This Different
+## Features
 
-### Before (Your Frustration):
-- Grainy Tkinter UI
-- Required admin rights
-- Complex file structure
-- Confusing workflow
-- Looked like Windows XP
-
-### Now (Modern & Clean):
+- **Sidebar Navigation** - General, Notifications, History tabs
 - **CustomTkinter** - smooth, anti-aliased, professional
 - **No admin** - uses pynput (official Windows APIs)
-- **One main file** - easy to understand
 - **Fast workflow** - <1 second to add cards
-- **Looks like 2024** - modern dark theme
+- **Modern dark theme** - Navy blue primary, pinkish-red accents
 
-## 🔧 Customization
+## Customization
 
 Users can customize in settings:
-- **Hotkey** - Change from Ctrl+Alt+D to anything
+
+**General Tab:**
+- **Hotkey** - Change from Ctrl+Alt+D to anything (or reset to disable)
 - **Default Deck** - Set for instant adds (skip dialog)
 - **Auto-Start** - Toggle Windows startup
 
-All settings saved to: `~/.dict_to_anki_settings.json`
+**Notifications Tab:**
+- **Card Counter Badge** - Shows on tray icon
+- **Toast Notification** - Semi-transparent corner popup
 
-## 📤 Publishing to GitHub
+**History Tab:**
+- View 10 most recent cards
+- Clicking clears the badge counter
+
+All settings saved to: `~/.lexi_snap_settings.json`
+
+## Publishing to GitHub
 
 When ready to release:
 
@@ -102,20 +106,17 @@ When ready to release:
    ```
 
 2. **Upload installer:**
-   - Go to GitHub → Releases → Create Release
-   - Upload `Output/DictToAnki-Setup.exe`
+   - Go to GitHub -> Releases -> Create Release
+   - Upload `Output/LexiSnap-Setup.exe`
    - Users download and double-click - done!
 
-## 🎉 Success!
+## Success!
 
 You now have a **professional desktop app** that:
-- ✅ Looks modern (CustomTkinter)
-
-- ✅ Requires no admin
-- ✅ Installs like Discord/Spotify
-- ✅ Auto-starts on login
-- ✅ Fast workflow (<1s)
-- ✅ Beautiful dark UI
-- ✅ Single file architecture
-
-Just like Handy! 🚀
+- Looks modern (CustomTkinter)
+- Requires no admin
+- Installs like Discord/Spotify
+- Auto-starts on login
+- Fast workflow (<1s)
+- Beautiful dark UI
+- Sidebar navigation with tabs
