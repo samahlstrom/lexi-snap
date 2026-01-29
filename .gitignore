@@ -4,6 +4,9 @@ __pycache__/
 *$py.class
 *.so
 .Python
+env/
+venv/
+ENV/
 build/
 develop-eggs/
 dist/
@@ -20,18 +23,17 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual Environment
-venv/
-ENV/
-env/
+# PyInstaller
+*.manifest
+*.spec.bak
 
-# IDEs
+# IDE
 .vscode/
 .idea/
-.claude/
 *.swp
 *.swo
 *~
+.history/
 
 # OS
 .DS_Store
@@ -39,13 +41,13 @@ Thumbs.db
 desktop.ini
 
 # Project specific
-config.ini
-*.log
-test_output/
-*.spec
+Output/
+build/
+dist/
+*.pyc
+*.pyo
+*.pyd
+.Python
 
-# Build artifacts
-*.exe
-*.app
-*.dmg
-*.zip
+# Local config
+.claude/

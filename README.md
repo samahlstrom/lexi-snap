@@ -2,88 +2,164 @@
 
 Create Anki flashcards from any selected text with a simple hotkey. Works system-wide - no admin required!
 
-## Features
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Platform](https://img.shields.io/badge/platform-Windows%2010/11-lightgrey)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-✓ **System-wide hotkey** (Ctrl+Alt+D) - works in any app
-✓ **No admin required** - installs and runs as regular user
-✓ **System tray app** - runs silently in background
-✓ **Auto definitions** - fetches from dictionary API
-✓ **Simple UI** - just select deck and go
+## ✨ Features
 
-## Installation
+- **Global Hotkey** - Press `Ctrl+Alt+D` on any selected text (customizable)
+- **Auto Dictionary Lookup** - Fetches definitions automatically
+- **Modern UI** - Beautiful dark theme with CustomTkinter
+- **No Admin Required** - Installs and runs as regular user
+- **System Tray** - Runs silently in background
+- **Fast Workflow** - Set default deck for instant card creation (<1 second!)
+- **Auto-Start** - Optionally launch on Windows startup
 
-1. **Install dependencies:**
-   ```
-   Double-click install.bat
-   ```
+## 📥 Installation
 
-2. **Make sure you have:**
-   - Anki installed and running
-   - AnkiConnect add-on (code: 2055492159)
+### For Normal Users (Recommended)
 
-## Usage
+1. **Download the installer:**
+   - Go to [Releases](https://github.com/yourusername/dict-to-anki/releases)
+   - Download `DictToAnki-Setup.exe` (latest version)
 
-1. **Start the app:**
-   ```
-   Double-click start.bat
-   ```
-   Look for the icon in your system tray (bottom-right)
+2. **Run the installer:**
+   - Double-click `DictToAnki-Setup.exe`
+   - Click "Next" → "Install" → "Finish"
+   - App launches automatically
 
-2. **Create a card:**
-   - Highlight any word
-   - Press **Ctrl+Alt+D**
-   - Select a deck
-   - Done!
+3. **Install AnkiConnect:**
+   - Open Anki
+   - Go to: Tools → Add-ons → Get Add-ons
+   - Enter code: `2055492159`
+   - Restart Anki
 
-3. **Settings:**
-   - Double-click the tray icon
-   - Or right-click → Settings
+That's it! No Python, no terminal commands required.
 
-## How It Works
+### For Developers
 
-One simple file: `dict_to_anki_app.py`
+```bash
+# Clone repository
+git clone https://github.com/yourusername/dict-to-anki
+cd dict-to-anki
 
-- Uses `pynput` for global hotkeys (no admin needed!)
-- Runs in system tray with `pystray`
-- Optional settings window
-- Connects to Anki via AnkiConnect
+# Install dependencies
+pip install -r requirements.txt
 
-## Auto-Start (Optional)
+# Run from source
+python app.py
+```
 
-To start automatically on Windows login:
+## 🚀 Usage
 
-1. Press Win+R
-2. Type: `shell:startup`
-3. Create shortcut to `start.bat` in that folder
+### First Time Setup
 
-## Requirements
+1. Make sure Anki is running
+2. Look for Dict-to-Anki icon in system tray (bottom-right)
+3. Double-click the tray icon to open settings
+4. (Optional) Set a default deck for faster workflow
+5. (Optional) Customize the hotkey
 
-- Python 3.8+
-- Anki with AnkiConnect add-on
-- Windows (macOS support coming)
+### Creating Cards
 
-## Files
+**Fast Method (with default deck):**
+1. Highlight any word in any application
+2. Press `Ctrl+Alt+D`
+3. Card added instantly!
+4. Notification confirms
 
-- `dict_to_anki_app.py` - Main application (one file!)
-- `start.bat` - Launch script
-- `install.bat` - Install dependencies
+**Manual Method (no default deck):**
+1. Highlight any word
+2. Press `Ctrl+Alt+D`
+3. Modern dialog appears with:
+   - The word
+   - Auto-fetched definition
+   - Deck selector
+4. Click "Add Card"
+5. Done!
 
-That's it. No complex installer, no build process, no BS.
+### Settings
 
-## Troubleshooting
+Double-click the tray icon to access settings:
 
-**"Anki not running"**
-- Start Anki before using the app
-- Install AnkiConnect add-on from Anki
+- **Keyboard Shortcut** - Change the hotkey (e.g., `ctrl+shift+a`)
+- **Default Deck** - Select deck for instant adds (or "Ask every time")
+- **Launch on Startup** - Toggle auto-start on Windows login
 
-**"Hotkey not working"**
-- Check system tray - is the app running?
-- Try restarting the app
+## 🛠️ Requirements
 
-**"No text selected"**
-- Make sure to highlight text first
-- Press Ctrl+Alt+D while text is selected
+- **Windows 10 or 11**
+- **Anki** with **AnkiConnect** add-on (code: 2055492159)
+- No Python installation needed (for normal users)
 
-## License
+## 🔧 Building from Source
 
-MIT
+### Build Executable
+
+```bash
+# Install PyInstaller
+pip install pyinstaller
+
+# Build
+python build_installer.py
+```
+
+Output: `dist/DictToAnki.exe`
+
+### Create Installer
+
+Requires [Inno Setup](https://jrsoftware.org/isdl.php) (free):
+
+```bash
+iscc installer.iss
+```
+
+Output: `Output/DictToAnki-Setup.exe`
+
+## 📋 Troubleshooting
+
+### "Anki not running or no decks found"
+- Make sure Anki is running
+- Install AnkiConnect add-on: Tools → Add-ons → Get Add-ons → Code: `2055492159`
+- Restart Anki
+
+### "No text selected"
+- Make sure to highlight text before pressing the hotkey
+- Try selecting text again and press hotkey while text is highlighted
+
+### Hotkey not working
+- Check if another app is using the same hotkey
+- Try changing to a different key combination in settings
+- Restart the app after changing hotkey
+
+### Windows SmartScreen Warning
+- This is normal for apps without code signing ($200/year certificate)
+- Click "More info" → "Run anyway"
+- The app is safe and open-source
+
+## 🎨 Screenshots
+
+_Coming soon_
+
+## 🤝 Contributing
+
+Contributions welcome! Please feel free to submit a Pull Request.
+
+## 📝 License
+
+MIT License - see LICENSE file for details
+
+## 🙏 Credits
+
+- Dictionary API: [Free Dictionary API](https://dictionaryapi.dev/)
+- Anki Integration: [AnkiConnect](https://foosoft.net/projects/anki-connect/)
+- UI Framework: [CustomTkinter](https://github.com/TomSchimansky/CustomTkinter)
+
+## ⭐ Star History
+
+If you find this useful, please star the repo!
+
+---
+
+**Made with ❤️ for Anki users**
