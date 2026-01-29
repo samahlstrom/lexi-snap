@@ -2,7 +2,7 @@
 
 Create Anki flashcards from any selected text with a simple hotkey. Works system-wide - no admin required!
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Version](https://img.shields.io/badge/version-1.1.0-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010/11-lightgrey)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -24,10 +24,10 @@ Create Anki flashcards from any selected text with a simple hotkey. Works system
 
 1. **Download the installer:**
    - Go to [Releases](https://github.com/yourusername/lexi-snap/releases)
-   - Download `LexiSnap-Setup.exe` (latest version)
+   - Download `lexi-snap-Setup.exe` (latest version)
 
 2. **Run the installer:**
-   - Double-click `LexiSnap-Setup.exe`
+   - Double-click `lexi-snap-Setup.exe`
    - Click "Next" -> "Install" -> "Finish"
    - App launches automatically
 
@@ -116,7 +116,7 @@ pip install pyinstaller
 python build_installer.py
 ```
 
-Output: `dist/LexiSnap.exe`
+Output: `dist/lexi-snap.exe`
 
 ### Create Installer
 
@@ -126,7 +126,7 @@ Requires [Inno Setup](https://jrsoftware.org/isdl.php) (free):
 iscc installer.iss
 ```
 
-Output: `Output/LexiSnap-Setup.exe`
+Output: `Output/lexi-snap-Setup.exe`
 
 ## Troubleshooting
 

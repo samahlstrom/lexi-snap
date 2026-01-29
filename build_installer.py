@@ -7,7 +7,7 @@ import sys
 def build():
     """Build the executable."""
     print("=" * 60)
-    print("Building Lexi Snap standalone executable...")
+    print("Building Lexi Snap (lexi-snap) standalone executable...")
     print("=" * 60)
 
     # Check for icon
@@ -15,7 +15,7 @@ def build():
 
     args = [
         'app.py',
-        '--name=LexiSnap',
+        '--name=lexi-snap',
         '--onefile',
         '--windowed',  # No console window
         '--noconfirm',
@@ -42,9 +42,9 @@ def build():
 
         print("\n" + "=" * 60)
         print("Build successful!")
-        print(f"\nExecutable: dist\\LexiSnap.exe")
+        print(f"\nExecutable: dist\\lexi-snap.exe")
         print("\nNext steps:")
-        print("  1. Test: dist\\LexiSnap.exe")
+        print("  1. Test: dist\\lexi-snap.exe")
         print("  2. Create installer: iscc installer.iss")
         print("=" * 60)
 

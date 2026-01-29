@@ -20,7 +20,7 @@ import pystray
 from PIL import Image, ImageDraw, ImageFont
 
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 
 
 class SettingsManager:
@@ -94,7 +94,7 @@ class LexiSnapApp:
     }
 
     STARTUP_REG_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
-    STARTUP_APP_NAME = "LexiSnap"
+    STARTUP_APP_NAME = "lexi-snap"
 
     def __init__(self):
         self.settings_manager = SettingsManager()
@@ -261,7 +261,7 @@ class LexiSnapApp:
         
         badge_enabled = self.settings_manager.get('notification_badge_enabled', True)
         self.tray_icon = pystray.Icon(
-            "LexiSnap",
+            "lexi-snap",
             self.create_tray_icon_image(with_badge=badge_enabled),
             "Lexi Snap",
             menu
@@ -959,7 +959,7 @@ class LexiSnapApp:
         # Set AppUserModelID for Windows taskbar grouping and icon
         try:
             import ctypes
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('LexiSnap.App.1.0')
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('lexi-snap.App.1.0')
         except:
             pass
         
@@ -1465,7 +1465,7 @@ def main():
     from ctypes import wintypes
     
     kernel32 = ctypes.windll.kernel32
-    mutex_name = "LexiSnap_SingleInstance_Mutex"
+    mutex_name = "lexi-snap_SingleInstance_Mutex"
     
     handle = kernel32.CreateMutexW(None, True, mutex_name)
     last_error = kernel32.GetLastError()

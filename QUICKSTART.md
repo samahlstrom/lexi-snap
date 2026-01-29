@@ -40,7 +40,7 @@ pip install pyinstaller
 python build_installer.py
 ```
 
-This creates: `dist/LexiSnap.exe` (30-40MB standalone)
+This creates: `dist/lexi-snap.exe` (30-40MB standalone)
 
 ### Step 2: Create Windows Installer
 
@@ -51,7 +51,7 @@ cd C:\Users\Sam\Documents\GitHub\dict-to-anki
 iscc installer.iss
 ```
 
-This creates: `Output/LexiSnap-Setup.exe`
+This creates: `Output/lexi-snap-Setup.exe`
 
 ## File Structure
 
@@ -60,7 +60,7 @@ lexi-snap/
 ├── app.py                 # Main application
 ├── requirements.txt       # Python dependencies
 ├── build_installer.py     # PyInstaller build script
-├── LexiSnap.spec          # PyInstaller spec file
+├── lexi-snap.spec         # PyInstaller spec file
 ├── installer.iss          # Inno Setup configuration
 ├── README.md              # User documentation
 └── assets/                # App icons
@@ -107,7 +107,7 @@ When ready to release:
 
 2. **Upload installer:**
    - Go to GitHub -> Releases -> Create Release
-   - Upload `Output/LexiSnap-Setup.exe`
+   - Upload `Output/lexi-snap-Setup.exe`
    - Users download and double-click - done!
 
 ## Success!
