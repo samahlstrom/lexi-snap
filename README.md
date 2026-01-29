@@ -23,7 +23,7 @@ Create Anki flashcards from any selected text with a simple hotkey. Works system
 ### For Normal Users (Recommended)
 
 1. **Download the installer:**
-   - Go to [Releases](https://github.com/yourusername/lexi-snap/releases)
+   - Go to [Releases](https://github.com/samahlstrom/lexi-snap/releases)
    - Download `lexi-snap-Setup.exe` (latest version)
 
 2. **Run the installer:**
