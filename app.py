@@ -38,6 +38,7 @@ class SettingsManager:
             'notification_badge_enabled': True,
             'notification_toast_enabled': False,
             'card_history': [],  # List of {word, definition, timestamp}
+            'cached_decks': [],  # Cached Anki deck list for faster startup
         }
         if self.settings_file.exists():
             try:
@@ -111,6 +112,17 @@ class LexiSnapApp:
         
         # Session card counter for badge
         self.session_card_count = 0
+        
+        # Anki status label reference
+        self.anki_status_label = None
+        
+        # Deck dropdown reference for async updates
+        self.deck_dropdown = None
+        self.deck_dropdown_values = []
+        
+        # Anki connection monitoring
+        self._anki_connected = False
+        self._anki_monitor_running = False
         
         # Current active tab
         self.current_tab = "general"
@@ -260,6 +272,7 @@ class LexiSnapApp:
     def quit_application(self):
         """Properly quit the application."""
         self.quitting = True
+        self._stop_anki_monitor()
         if self.tray_icon:
             try:
                 self.tray_icon.stop()
@@ -566,6 +579,12 @@ class LexiSnapApp:
                 elif item[0] == 'refresh_history':
                     if self.current_tab == 'history':
                         self._refresh_history_content()
+                elif item[0] == 'update_anki_status':
+                    self._update_anki_status()
+                elif item[0] == 'set_anki_status':
+                    self._set_anki_status_label(item[1])
+                elif item[0] == 'update_deck_dropdown':
+                    self._update_deck_dropdown(item[1])
         except queue.Empty:
             pass
         
@@ -659,15 +678,24 @@ class LexiSnapApp:
         toast.geometry(f"{toast_width}x{toast_height}+{x}+{y}")
         toast.update_idletasks()  # Ensure geometry is applied
         
-        # Main frame with rounded corners
+        # Use a chroma key color to make window background transparent
+        # This allows the rounded corners to show properly
+        chroma_key = "#010101"  # Nearly black, unlikely to be used elsewhere
+        toast.wm_attributes("-transparentcolor", chroma_key)
+        
+        # Outer frame fills window with the transparent color
+        outer = ctk.CTkFrame(toast, fg_color=chroma_key, corner_radius=0)
+        outer.pack(fill="both", expand=True)
+        
+        # Inner frame with rounded corners - this is the visible toast
         frame = ctk.CTkFrame(
-            toast, 
+            outer, 
             fg_color=self.COLORS['card'], 
-            corner_radius=12,
+            corner_radius=20,
             border_width=1,
             border_color=self.COLORS['border']
         )
-        frame.pack(fill="both", expand=True, padx=2, pady=2)
+        frame.pack(fill="both", expand=True, padx=4, pady=4)
         
         # Toast text - bold, larger, with word wrap for 2 lines max
         ctk.CTkLabel(
@@ -732,9 +760,128 @@ class LexiSnapApp:
                 json={'action': 'addNote', 'version': 6, 'params': {'note': note}},
                 timeout=2
             )
-            return response.status_code == 200 and response.json().get('error') is None
+            success = response.status_code == 200 and response.json().get('error') is None
+            # Update Anki status after operation
+            self.gui_queue.put(('update_anki_status', None, None))
+            return success
+        except:
+            # Update Anki status after failed operation
+            self.gui_queue.put(('update_anki_status', None, None))
+            return False
+
+    def _ping_anki(self):
+        """Quick check if Anki is responding (short timeout for status checks)."""
+        try:
+            response = requests.post(
+                self.anki_url,
+                json={'action': 'version', 'version': 6},
+                timeout=0.3
+            )
+            return response.status_code == 200
         except:
             return False
+
+    def _update_anki_status(self):
+        """Update the Anki connection status label (runs check in background thread)."""
+        def check_and_update():
+            is_connected = self._ping_anki()
+            self.gui_queue.put(('set_anki_status', is_connected, None))
+        
+        threading.Thread(target=check_and_update, daemon=True).start()
+
+    def _set_anki_status_label(self, is_connected):
+        """Set the Anki status label (called from GUI thread)."""
+        if self.anki_status_label:
+            status_text = "Anki connected" if is_connected else "Anki not detected"
+            status_color = self.COLORS['success'] if is_connected else self.COLORS['error']
+            self.anki_status_label.configure(text=status_text, text_color=status_color)
+
+    def _fetch_decks_async(self):
+        """Fetch Anki decks in background thread and update UI."""
+        def fetch():
+            decks = self.get_anki_decks()
+            is_connected = bool(decks)
+            self._anki_connected = is_connected
+            # Cache the deck list for faster startup next time
+            if decks:
+                self.settings_manager.set('cached_decks', decks)
+            # Update UI via queue
+            self.gui_queue.put(('update_deck_dropdown', decks, None))
+            self.gui_queue.put(('set_anki_status', is_connected, None))
+        
+        threading.Thread(target=fetch, daemon=True).start()
+
+    def _start_anki_monitor(self):
+        """Start background monitoring of Anki connection."""
+        if self._anki_monitor_running:
+            return
+        self._anki_monitor_running = True
+        
+        def monitor():
+            while self._anki_monitor_running and not self.quitting:
+                try:
+                    is_connected = self._ping_anki()
+                    was_connected = self._anki_connected
+                    
+                    if is_connected != was_connected:
+                        self._anki_connected = is_connected
+                        if is_connected:
+                            # Just connected - fetch full deck list
+                            decks = self.get_anki_decks()
+                            if decks:
+                                self.settings_manager.set('cached_decks', decks)
+                            self.gui_queue.put(('update_deck_dropdown', decks, None))
+                        else:
+                            # Just disconnected - show cached decks (grayed out via status)
+                            cached = self.settings_manager.get('cached_decks', [])
+                            self.gui_queue.put(('update_deck_dropdown', cached, None))
+                        self.gui_queue.put(('set_anki_status', is_connected, None))
+                except:
+                    pass
+                
+                # Poll every 2 seconds
+                time.sleep(2)
+        
+        threading.Thread(target=monitor, daemon=True).start()
+
+    def _stop_anki_monitor(self):
+        """Stop the Anki connection monitor."""
+        self._anki_monitor_running = False
+
+    def _quick_anki_check(self):
+        """Quick check of Anki status using fast ping, fetch decks only if state changed."""
+        def check():
+            is_connected = self._ping_anki()
+            was_connected = self._anki_connected
+            
+            if is_connected != was_connected:
+                self._anki_connected = is_connected
+                if is_connected:
+                    # Just connected - fetch full deck list
+                    decks = self.get_anki_decks()
+                    if decks:
+                        self.settings_manager.set('cached_decks', decks)
+                    self.gui_queue.put(('update_deck_dropdown', decks, None))
+                else:
+                    # Just disconnected - show cached decks
+                    cached = self.settings_manager.get('cached_decks', [])
+                    self.gui_queue.put(('update_deck_dropdown', cached, None))
+            
+            self.gui_queue.put(('set_anki_status', is_connected, None))
+        
+        threading.Thread(target=check, daemon=True).start()
+
+    def _update_deck_dropdown(self, decks):
+        """Update the deck dropdown with fetched decks (called from GUI thread)."""
+        self.deck_dropdown_values = ["None (Ask every time)"] + decks
+        if self.deck_dropdown:
+            current_deck = self.settings_manager.get('default_deck') or "None (Ask every time)"
+            self.deck_dropdown.configure(values=self.deck_dropdown_values)
+            # Restore selection if it exists in new list
+            if current_deck in self.deck_dropdown_values:
+                self.deck_dropdown.set(current_deck)
+            else:
+                self.deck_dropdown.set("None (Ask every time)")
 
     def _show_deck_selector(self, word, definition):
         """Show deck selector dialog."""
@@ -936,6 +1083,10 @@ class LexiSnapApp:
             self.session_card_count = 0
             self.update_tray_icon()
             self._refresh_history_content()
+        
+        # Quick status check when switching to general tab
+        if tab_id == "general":
+            self._quick_anki_check()
 
         self.current_tab = tab_id
 
@@ -1020,23 +1171,25 @@ class LexiSnapApp:
             text_color=self.COLORS['text']
         ).pack(side="left")
 
-        decks = ["None (Ask every time)"] + self.get_anki_decks()
+        # Use cached decks for instant display, will be updated async
+        cached_decks = self.settings_manager.get('cached_decks', [])
+        self.deck_dropdown_values = ["None (Ask every time)"] + cached_decks
         current_deck = self.settings_manager.get('default_deck') or "None (Ask every time)"
 
         def update_deck(choice):
             self.settings_manager.set('default_deck', None if choice == "None (Ask every time)" else choice)
 
-        deck_dropdown = ctk.CTkComboBox(
+        self.deck_dropdown = ctk.CTkComboBox(
             deck_frame, 
-            values=decks, 
+            values=self.deck_dropdown_values, 
             command=update_deck, 
             width=180,
             fg_color=self.COLORS['input'],
             button_color=self.COLORS['primary'],
             button_hover_color=self.COLORS['primary_hover']
         )
-        deck_dropdown.set(current_deck)
-        deck_dropdown.pack(side="right")
+        self.deck_dropdown.set(current_deck)
+        self.deck_dropdown.pack(side="right")
 
         # Divider
         ctk.CTkFrame(card, fg_color=self.COLORS['border'], height=1).pack(fill="x", padx=20)
@@ -1065,26 +1218,29 @@ class LexiSnapApp:
             text="",
             variable=startup_var,
             command=toggle_startup,
-            progress_color=self.COLORS['primary'],
-            button_color=self.COLORS['text'],
-            button_hover_color=self.COLORS['text'],
+            width=51,
+            height=26,
+            switch_width=48,
             switch_height=24,
+            corner_radius=12,
+            fg_color=("#d1d5db", "#4b5563"),  # Gray when OFF (light/dark mode)
+            progress_color=self.COLORS['primary'],  # Blue when ON
+            button_color=self.COLORS['text'],  # White button
+            button_hover_color=("#f3f4f6", "#e5e7eb"),  # Slight hover effect
         )
         startup_switch.pack(side="right")
 
-        # Status indicator
+        # Status indicator - shows "Checking..." until async check completes
         status_frame = ctk.CTkFrame(frame, fg_color=self.COLORS['bg'])
         status_frame.pack(fill="x", pady=(20, 0))
 
-        status_text = "Anki connected" if self.get_anki_decks() else "Anki not detected"
-        status_color = self.COLORS['success'] if "connected" in status_text else self.COLORS['error']
-
-        ctk.CTkLabel(
+        self.anki_status_label = ctk.CTkLabel(
             status_frame,
-            text=status_text,
+            text="Checking Anki...",
             font=("Segoe UI", 12),
-            text_color=status_color
-        ).pack(side="left")
+            text_color=self.COLORS['text_secondary']
+        )
+        self.anki_status_label.pack(side="left")
 
     def _create_notifications_tab(self):
         """Create the Notifications settings tab."""
@@ -1135,10 +1291,15 @@ class LexiSnapApp:
             text="",
             variable=badge_var,
             command=toggle_badge,
-            progress_color=self.COLORS['primary'],
-            button_color=self.COLORS['text'],
-            button_hover_color=self.COLORS['text'],
-            switch_height=25
+            width=51,
+            height=26,
+            switch_width=48,
+            switch_height=24,
+            corner_radius=12,
+            fg_color=("#d1d5db", "#4b5563"),  # Gray when OFF (light/dark mode)
+            progress_color=self.COLORS['primary'],  # Blue when ON
+            button_color=self.COLORS['text'],  # White button
+            button_hover_color=("#f3f4f6", "#e5e7eb"),  # Slight hover effect
         )
         badge_switch.pack(side="right")
 
@@ -1176,10 +1337,15 @@ class LexiSnapApp:
             text="",
             variable=toast_var,
             command=toggle_toast,
-            progress_color=self.COLORS['primary'],
-            button_color=self.COLORS['text'],
-            button_hover_color=self.COLORS['text'],
-            switch_height=25
+            width=51,
+            height=26,
+            switch_width=48,
+            switch_height=24,
+            corner_radius=12,
+            fg_color=("#d1d5db", "#4b5563"),  # Gray when OFF (light/dark mode)
+            progress_color=self.COLORS['primary'],  # Blue when ON
+            button_color=self.COLORS['text'],  # White button
+            button_hover_color=("#f3f4f6", "#e5e7eb"),  # Slight hover effect
         )
         toast_switch.pack(side="right")
 
@@ -1270,6 +1436,12 @@ class LexiSnapApp:
             self.root.withdraw()
         
         self.root.after(100, self.process_gui_queue)
+        
+        # Fetch Anki decks asynchronously after window is shown
+        self.root.after(200, self._fetch_decks_async)
+        
+        # Start background Anki connection monitoring
+        self.root.after(500, self._start_anki_monitor)
         
         print("Lexi Snap running!")
         hotkey = self.settings_manager.get('hotkey', '')
